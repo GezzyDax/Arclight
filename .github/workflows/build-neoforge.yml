@@ -40,9 +40,10 @@ jobs:
       - name: Get release tag from versions
         id: tag
         run: |
-          MC=$(grep '^minecraft = ' gradle/libs.versions.toml | sed "s/minecraft = '//;s/'//")
-          NF=$(grep '^neoforge = ' gradle/libs.versions.toml | sed "s/neoforge = '//;s/'//")
+          MC=$(awk -F"'" '/^minecraft = /{print $2}' gradle/libs.versions.toml)
+          NF=$(awk -F"'" '/^neoforge = /{print $2}' gradle/libs.versions.toml)
           echo "name=neoforge${MC}-${NF}" >> $GITHUB_OUTPUT
+          echo "Release tag: neoforge${MC}-${NF}"
 
       - name: Build NeoForge JAR
         run: ./gradlew :bootstrap:neoforgeJar --no-daemon --stacktrace
