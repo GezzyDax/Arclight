@@ -40,8 +40,8 @@ jobs:
       - name: Get release tag from versions
         id: tag
         run: |
-          MC=$(awk -F"'" '/^minecraft = /{print $2}' gradle/libs.versions.toml)
-          NF=$(awk -F"'" '/^neoforge = /{print $2}' gradle/libs.versions.toml)
+          MC=$(awk -F"'" '/^minecraft = /{print $2; exit}' gradle/libs.versions.toml)
+          NF=$(awk -F"'" '/^neoforge = /{print $2; exit}' gradle/libs.versions.toml)
           echo "name=neoforge${MC}-${NF}" >> $GITHUB_OUTPUT
           echo "Release tag: neoforge${MC}-${NF}"
 
