@@ -1,0 +1,52 @@
+name: Build NeoForge
+
+on:
+  push:
+    branches: [ FeudalKings ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle user home
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-gradle-user-${{ hashFiles('**/*.gradle*', '**/libs.versions.toml') }}
+          restore-keys: ${{ runner.os }}-gradle-user-
+
+      - name: Cache project .gradle
+        uses: actions/cache@v4
+        with:
+          path: ./.gradle
+          key: ${{ runner.os }}-gradle-proj-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-proj-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build NeoForge JAR
+        run: ./gradlew :bootstrap:neoforgeJar --no-daemon --stacktrace
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arclight-neoforge-1.21.1
+          path: bootstrap/build/libs/arclight-neoforge-1.21.1.jar
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bootstrap/build/libs/arclight-neoforge-1.21.1.jar
